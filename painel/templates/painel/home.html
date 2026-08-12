@@ -1,0 +1,10 @@
+<h1>PAINEL PRINCIPAL - RESTRITO</h1>
+
+<h1>Bem-vindo ao Painel!</h1>
+<p>Olá, {{ request.user.username }}!</p>
+
+<!-- Botão de Logout -->
+<form action="{% url 'logout' %}" method="POST">
+    {% csrf_token %}
+    <button type="submit">Sair da Conta</button>
+</form>

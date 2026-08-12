@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastro</title>
+</head>
+<body>
+    <h2>Criar Conta</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <p style="color: red;">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" action="{% url 'cadastro' %}">
+        {% csrf_token %}
+        
+        <label>Usuário:</label><br>
+        <input type="text" name="usuario" required><br><br>
+
+        <label>E-mail:</label><br>
+        <input type="email" name="email" required><br><br>
+
+        <label>Senha:</label><br>
+        <input type="password" name="senha" required><br><br>
+
+        <label>Confirmar Senha:</label><br>
+        <input type="password" name="confirmar_senha" required><br><br>
+
+        <button type="submit">Cadastrar</button>
+    </form>
+
+    <p>Já possui conta? <a href="{% url 'login' %}">Entrar</a></p>
+</body>
+</html>
