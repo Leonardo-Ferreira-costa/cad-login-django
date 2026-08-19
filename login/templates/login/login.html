@@ -16,8 +16,8 @@
     <form method="POST" action="{% url 'login' %}">
         {% csrf_token %}
         
-        <label>Usuário:</label><br>
-        <input type="text" name="usuario" required><br><br>
+        <label>Email:</label><br>
+        <input type="text" name="email" required><br><br>
 
         <label>Senha:</label><br>
         <input type="password" name="senha" required><br><br>

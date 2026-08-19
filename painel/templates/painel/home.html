@@ -3,6 +3,24 @@
 <h1>Bem-vindo ao Painel!</h1>
 <p>Olá, {{ request.user.username }}!</p>
 
+<table>
+    <thead>
+        <tr>
+            <th>Nome de Usuário</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for usuario in usuarios %}
+        <tr>
+            <td>{{ usuario.username }}</td>
+            <td>{{ usuario.email }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+
+    
+
 <!-- Botão de Logout -->
 <form action="{% url 'logout' %}" method="POST">
     {% csrf_token %}
