@@ -1,17 +1,42 @@
-# Cadastro Login
+# Sistema de Cadastro e Login com Ativação por E-mail
 
-Sistema de autenticação e cadastro em Django com páginas separadas para cadastro, login, painel e home.
+Projeto desenvolvido em Django para gerenciar cadastro, login e ativação de conta por link enviado ao e-mail do usuário.
 
 ## Visão geral
 
-Este projeto foi desenvolvido em Django e contém:
+Este sistema permite:
 
-- Página inicial
-- Cadastro de usuários
-- Login de usuários
-- Painel autenticado após login
-- Logout
-- Administração padrão do Django
+- cadastro de novos usuários
+- confirmação de senha
+- validação de e-mail único
+- ativação da conta através de link enviado por e-mail
+- login apenas para usuários ativos
+- painel autenticado após login
+- logout e administração padrão do Django
+
+## Funcionalidades implementadas
+
+- Cadastro com nome de usuário informado pelo usuário
+- Armazenamento do nome visual do usuário em `first_name`
+- Usuário interno do Django com `username` gerado automaticamente para evitar duplicidade
+- Validação focada no `email`, em vez de nome de usuário
+- Bloqueio de cadastro caso o e-mail já exista
+- Criação do usuário com `is_active=False`
+- Envio de e-mail com link de ativação
+- Ativação da conta ao acessarem o link gerado
+- Redirecionamento para a tela de login após ativação
+
+## Fluxo de cadastro e ativação
+
+1. O usuário preenche cadastro com nome, e-mail e senha.
+2. O sistema valida:
+   - senha e confirmação iguais
+   - senha com pelo menos 8 caracteres
+   - e-mail ainda não cadastrado
+3. O usuário é criado como inativo.
+4. Um link de ativação é gerado e enviado por e-mail.
+5. Ao clicar no link, o sistema ativa o usuário.
+6. O usuário pode então fazer login normalmente.
 
 ## Estrutura do projeto
 
@@ -20,32 +45,30 @@ cadastro-login/
 ├── app/
 │   ├── templates/
 │   │   └── app/
-│   ├── views.py
-│   └── ...
+│   └── views.py
 ├── cadastro/
 │   ├── templates/
 │   │   └── cadastro/
-│   ├── views.py
-│   └── ...
+│   └── views.py
 ├── login/
 │   ├── templates/
 │   │   └── login/
-│   ├── views.py
-│   └── ...
+│   └── views.py
 ├── painel/
 │   ├── templates/
 │   │   └── painel/
-│   ├── views.py
-│   └── ...
+│   └── views.py
 ├── sistema/
 │   ├── settings.py
 │   ├── urls.py
-│   └── ...
+│   ├── asgi.py
+│   └── wsgi.py
 ├── db.sqlite3
 ├── manage.py
 ├── env/
+├── requirements.txt
 ├── README.md
-└── requirements.txt (se adicionado posteriormente)
+└── .gitignore
 ```
 
 ## Tecnologias
@@ -54,12 +77,13 @@ cadastro-login/
 - Django 6.1
 - SQLite
 - HTML
+- SMTP para envio de e-mails
 
 ## Pré-requisitos
 
 - Python 3.10 ou superior
-- Ambiente virtual recomendado
-- Git (opcional)
+- Ambiente virtual
+- Git opcional
 
 ## Como executar
 
@@ -77,19 +101,25 @@ No Windows:
 env\Scripts\activate
 ```
 
-3. Execute as migrações do banco de dados:
+3. Instale as dependências:
+
+```bash
+pip install -r requirements.txt
+```
+
+4. Execute as migrações:
 
 ```bash
 python manage.py migrate
 ```
 
-4. Inicie o servidor local:
+5. Inicie o servidor:
 
 ```bash
 python manage.py runserver
 ```
 
-5. Abra no navegador:
+6. Acesse no navegador:
 
 ```text
 http://127.0.0.1:8000/
@@ -101,23 +131,44 @@ http://127.0.0.1:8000/
 - `/cadastro/` — cadastro de usuário
 - `/login/` — login
 - `/painel/` — painel principal (requer autenticação)
-- `/logout/` — encerra a sessão do usuário
-- `/admin/` — área administrativa do Django
+- `/logout/` — encerra a sessão
+- `/ativar/<uidb64>/<token>/` — ativação da conta
+- `/admin/` — painel administrativo do Django
 
-## Funcionalidades
+## Configuração de e-mail
 
-- Registro de novos usuários
-- Validação de confirmação de senha
-- Verificação de usuário duplicado
-- Login com autenticação do Django
-- Redirecionamento para painel após login
-- Proteção de acesso com `@login_required`
+A aplicação usa o backend SMTP do Django para enviar o link de ativação. O arquivo `sistema/settings.py` contém as configurações do e-mail, incluindo:
 
-## Observações
+- `EMAIL_BACKEND`
+- `EMAIL_HOST`
+- `EMAIL_PORT`
+- `EMAIL_USE_TLS`
+- `EMAIL_HOST_USER`
+- `EMAIL_HOST_PASSWORD`
+- `DEFAULT_FROM_EMAIL`
 
-- A senha do usuário é criada com `create_user`, que gera a hash corretamente.
-- O banco usado é o SQLite, armazenado em `db.sqlite3`.
-- O projeto está em modo de desenvolvimento (`DEBUG = True`).
+Para funcionar corretamente, informe as credenciais do serviço de e-mail no arquivo de configuração antes de testar o cadastro.
+
+Exemplo de configuração:
+
+```python
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'seu-email@gmail.com'
+EMAIL_HOST_PASSWORD = 'sua-senha-ou-app-password'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+```
+
+> Em ambiente de desenvolvimento, também é possível usar o backend de console para visualizar os e-mails no terminal, mas a implementação atual está configurada para SMTP.
+
+## Observações importantes
+
+- O campo `username` do Django é gerado automaticamente e não é mostrado ao usuário final.
+- O nome real do usuário é salvo em `first_name`.
+- A verificação de usuário duplicado é feita pelo `email`.
+- Usuários que ainda não ativaram a conta não podem fazer login.
 
 ## Criar usuário administrador
 
@@ -135,4 +186,4 @@ http://127.0.0.1:8000/admin/
 
 ## Licença
 
-Este projeto foi desenvolvido para fins de estudo e prática de Django.
+Este projeto foi desenvolvido para fins de estudo e prática com Django.

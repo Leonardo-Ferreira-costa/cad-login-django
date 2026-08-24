@@ -1,7 +1,7 @@
 <h1>PAINEL PRINCIPAL - RESTRITO</h1>
 
 <h1>Bem-vindo ao Painel!</h1>
-<p>Olá, {{ request.user.username }}!</p>
+<p>Olá, {{ request.user.first_name }}!</p>
 
 <table>
     <thead>
@@ -13,7 +13,7 @@
     <tbody>
         {% for usuario in usuarios %}
         <tr>
-            <td>{{ usuario.username }}</td>
+            <td>{{ usuario.first_name }}</td>
             <td>{{ usuario.email }}</td>
         </tr>
         {% endfor %}
