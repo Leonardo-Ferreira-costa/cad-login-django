@@ -1,6 +1,6 @@
 # Sistema de Cadastro e Login com Ativação por E-mail
 
-Projeto desenvolvido em Django para gerenciar cadastro, login e ativação de conta por link enviado ao e-mail do usuário.
+Projeto desenvolvido em Django para gerenciar cadastro, ativação de conta por e-mail e login com autenticação em duas etapas (MFA).
 
 ## Visão geral
 
@@ -11,6 +11,9 @@ Este sistema permite:
 - validação de e-mail único
 - ativação da conta através de link enviado por e-mail
 - login apenas para usuários ativos
+- autenticação em duas etapas com código enviado por e-mail
+- expiração do código MFA após 5 minutos
+- uso único dos códigos MFA
 - painel autenticado após login
 - logout e administração padrão do Django
 
@@ -25,6 +28,9 @@ Este sistema permite:
 - Envio de e-mail com link de ativação
 - Ativação da conta ao acessarem o link gerado
 - Redirecionamento para a tela de login após ativação
+- Geração e envio de código MFA após a senha ser validada
+- Invalidação de códigos MFA anteriores quando um novo código é gerado
+- Conclusão do login somente após a confirmação do código MFA
 
 ## Fluxo de cadastro e ativação
 
@@ -36,7 +42,19 @@ Este sistema permite:
 3. O usuário é criado como inativo.
 4. Um link de ativação é gerado e enviado por e-mail.
 5. Ao clicar no link, o sistema ativa o usuário.
-6. O usuário pode então fazer login normalmente.
+6. O usuário informa o e-mail e a senha na tela de login.
+7. O sistema envia um código MFA de seis dígitos por e-mail.
+8. O usuário informa o código na segunda etapa e acessa o painel.
+
+## Fluxo de autenticação em duas etapas
+
+1. O sistema localiza o usuário pelo e-mail informado.
+2. A senha é validada usando o sistema de autenticação padrão do Django.
+3. Códigos MFA anteriores e ainda não usados são invalidados.
+4. Um novo código de seis dígitos é salvo no banco e enviado por e-mail.
+5. O ID do usuário fica temporariamente armazenado na sessão.
+6. O código é aceito somente se não tiver sido usado e ainda estiver dentro do prazo de 5 minutos.
+7. Após a validação, o código é marcado como usado, a sessão é autenticada e o usuário é redirecionado para o painel.
 
 ## Estrutura do projeto
 
@@ -53,6 +71,9 @@ cadastro-login/
 ├── login/
 │   ├── templates/
 │   │   └── login/
+│   │       ├── login.html
+│   │       └── mfa.html
+│   ├── models.py           # Modelo TwoFactorCode
 │   └── views.py
 ├── painel/
 │   ├── templates/
@@ -137,7 +158,7 @@ http://127.0.0.1:8000/
 
 ## Configuração de e-mail
 
-A aplicação usa o backend SMTP do Django para enviar o link de ativação. O arquivo `sistema/settings.py` contém as configurações do e-mail, incluindo:
+A aplicação usa o backend SMTP do Django para enviar o link de ativação e o código MFA. O arquivo `sistema/settings.py` contém as configurações do e-mail, incluindo:
 
 - `EMAIL_BACKEND`
 - `EMAIL_HOST`
@@ -148,6 +169,8 @@ A aplicação usa o backend SMTP do Django para enviar o link de ativação. O a
 - `DEFAULT_FROM_EMAIL`
 
 Para funcionar corretamente, informe as credenciais do serviço de e-mail no arquivo de configuração antes de testar o cadastro.
+
+O e-mail do código MFA usa atualmente o remetente `no-reply@difusao.tech`, definido em `login/views.py`. Em produção, esse remetente deve ser alinhado ao serviço SMTP configurado em `settings.py`.
 
 Exemplo de configuração:
 
@@ -169,6 +192,8 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 - O nome real do usuário é salvo em `first_name`.
 - A verificação de usuário duplicado é feita pelo `email`.
 - Usuários que ainda não ativaram a conta não podem fazer login.
+- O código MFA expira após 5 minutos e não pode ser reutilizado.
+- É necessário configurar o SMTP para testar o envio do link de ativação e do código MFA.
 
 ## Criar usuário administrador
 
