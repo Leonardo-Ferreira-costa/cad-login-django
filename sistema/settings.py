@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,7 +21,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-tn78y2+z&k!g^!h14&*ugai-4d#bz*=k4@yzqidrq7er+b+7ha'
+DJANGO_SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -41,6 +43,7 @@ INSTALLED_APPS = [
     'cadastro',
     'login',
     'painel',
+    'sistema', #Adicionado para permitir a execução do comando de criação de usuários de teste no ambiente de desenvolvimento.
 ]
 
 MIDDLEWARE = [
@@ -121,21 +124,19 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 
-# Email
-# https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
-
-# MAILERS = {
-#     'default': {
-#         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-#     },
-# }
-
 # Configuração de E-mail (Gmail SMTP)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = ''        # Seu e-mail completo do Gmail
-EMAIL_HOST_PASSWORD = ''
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = 'smtp.gmail.com'
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_HOST_USER = "os.getenv('EMAIL_USER')"      # Seu e-mail completo do Gmail
+    EMAIL_HOST_PASSWORD = "os.getenv('EMAIL_PASSWORD')" # Senha do aplicativo do Gmail.
+    DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+# Login Redirect URL
+LOGIN_REDIRECT_URL = 'painel_redirect'
+# Login URL para redirecionamento de usuários não autenticados
+LOGIN_URL = 'login'

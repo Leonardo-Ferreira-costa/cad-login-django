@@ -19,7 +19,7 @@ from django.urls import path
 from  cadastro import views as cadastro_view
 from  login import views as login_view
 from app import views as app_view
-from painel import views as painel_view
+from painel import views as painel_views
 
 
 urlpatterns = [
@@ -29,6 +29,18 @@ urlpatterns = [
     path('ativar/<uidb64>/<token>/', cadastro_view.ativar_conta, name='ativar_conta'),
     path('login/', login_view.login_view, name='login'),
     path('login/mfa/', login_view.mfa_view, name='mfa'),
-    path('painel/', painel_view.painel_principal, name='painel'),
+    path('painel/', painel_views.painel_principal, name='painel'),
     path('logout/', login_view.logout_view, name='logout'),
+
+    # Rota principal após o login
+    path('painel/', login_view.painel_redirect, name='painel_redirect'),
+    
+    # Rotas específicas de cada nível
+    path('painel/administrador/', painel_views.view_administrador, name='view_administrador'),
+    path('painel/diretoria/', painel_views.view_diretoria, name='view_diretoria'),
+    path('painel/gerencia-geral/', painel_views.view_gerencia_geral, name='view_gerencia_geral'),
+    path('painel/gerencia/', painel_views.view_gerencia, name='view_gerencia'),
+    path('painel/supervisao/', painel_views.view_supervisao, name='view_supervisao'),
+    path('painel/atendente/', painel_views.view_atendente, name='view_atendente'),
+    path('painel/caixa/', painel_views.view_caixa, name='view_caixa'),
 ]

@@ -1,6 +1,9 @@
 <h1>PAINEL PRINCIPAL - RESTRITO</h1>
 
 <h1>Bem-vindo ao Painel!</h1>
+
+{% include 'includes/nav.html' %}
+
 <p>Olá, {{ request.user.first_name }}!</p>
 
 <table>

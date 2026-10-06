@@ -1,13 +1,21 @@
+from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
-from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+
+# Limita o acesso a usuários autenticados e verifica se pertencem a um grupo específico.
+from login.utils import verificar_grupo
+
 # Limita a view aos métodos HTTP usados pelo formulário de login.
 from django.views.decorators.http import require_http_methods
+
 # Recursos necessários para enviar o código MFA por e-mail.
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
 from .models import TwoFactorCode
+
 
 @require_http_methods(["GET", "POST"])
 def login_view(request):
@@ -107,3 +115,31 @@ def logout_view(request):
     """Encerra a sessão atual e volta para a página inicial."""
     logout(request)
     return redirect('home')
+
+
+
+# View de roteamento do painel, redirecionando para a view correspondente ao grupo do usuário.
+
+@login_required
+def painel_redirect(request):
+    user = request.user
+    
+    # Valida do cargo mais alto para o mais baixo
+    if verificar_grupo(user, 'administradores'):
+            return redirect('view_administrador')
+    if verificar_grupo(user, 'diretoria'):
+        return redirect('view_diretoria')
+    elif verificar_grupo(user, 'gerencia_geral'):
+        return redirect('view_gerencia_geral')
+    elif verificar_grupo(user, 'gerencia'):
+        return redirect('view_gerencia')
+    elif verificar_grupo(user, 'supervisao'):
+        return redirect('view_supervisao')
+    elif verificar_grupo(user, 'atendente'):
+        return redirect('view_atendente')
+    elif verificar_grupo(user, 'caixa'):
+        return redirect('view_caixa')
+    
+    # Se não tiver grupo ou for superusuário sem grupo definido
+    raise PermissionDenied
+

@@ -31,6 +31,9 @@ Thumbs.db
 .env
 .env.*
 
+# Local documentation
+DOCUMENTACAO.md
+
 # Build / coverage
 htmlcov/
 .coverage
